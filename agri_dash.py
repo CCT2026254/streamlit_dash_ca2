@@ -87,6 +87,14 @@ fig.update_traces(
     marker_line_width=0.8
 )
 
+# set a fixed figure size so the map is larger but not stretched across the full screen
+fig.update_layout(
+    width=950,
+    height=600,
+    margin=dict(l=0, r=0, t=50, b=0),
+    showlegend=False
+)
+
 # display the map in Streamlit.
 st.plotly_chart(fig, width="content")
 
