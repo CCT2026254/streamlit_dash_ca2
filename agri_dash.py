@@ -23,7 +23,7 @@ peer_countries = [
     {"country": "United Kingdom", "iso_alpha": "GBR", "role": "Peer country"},
     {"country": "Australia", "iso_alpha": "AUS", "role": "Peer country"},
     {"country": "New Zealand", "iso_alpha": "NZL", "role": "Peer country"},
-    {"country": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
+    # {"country": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
 ]
 
 # convert the list of dictionaries into a pandas dataframe
@@ -32,11 +32,12 @@ peer_df = pd.DataFrame(peer_countries)
 # create a list of selectable peer countries (i.e. exclude Ireland)
 peer_options = peer_df.loc[peer_df["country"] != "Ireland", "country"].tolist()
 
-# create a sidebar selection box with the list of peer countries
-selected_peer = st.sidebar.selectbox(
-    "Select peer country",
+# add horizontal radio buttons above the map
+selected_peer = st.radio(
+    "Select peer country for comparison with Ireland:",
     peer_options,
-    index=0
+    index=0,
+    horizontal=True
 )
 
 # create a display role column to control how each country is coloured on the map
@@ -57,9 +58,9 @@ fig = px.choropleth(
     color="display_role",
     hover_name="country",
     color_discrete_map={
-        "Ireland": "green",
-        "Selected peer": "orange",
-        "Other peer": "lightgrey"
+        "Ireland": "#2E8B57",          # green
+        "Selected peer": "#F28E2B",    # stronger orange
+        "Other peer": "#FAD7A0"        # light orange
     },
     title="Ireland and Selected Agricultural Peer Country"
 )
@@ -67,8 +68,17 @@ fig = px.choropleth(
 fig.update_geos(
     projection_type="natural earth",
     showcountries=True,
+    countrycolor="white",     # white country borders
     showcoastlines=True,
-    showland=True
+    coastlinecolor="white",
+    showland=True,
+    landcolor="#F2F2F2",      # very light grey for non-peer countries
+    showframe=False,
+
+    # These ranges focus the map on Europe, Australia, and New Zealand.
+    # This avoids most of the Americas after Uruguay is removed.
+    lonaxis_range=[-15, 180],
+    lataxis_range=[-50, 65]
 )
 
 # display the map in Streamlit.
