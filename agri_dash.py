@@ -32,71 +32,79 @@ peer_df = pd.DataFrame(peer_countries)
 # create a list of selectable peer countries (i.e. exclude Ireland)
 peer_options = peer_df.loc[peer_df["country"] != "Ireland", "country"].tolist()
 
-# add horizontal radio buttons above the map
-selected_peer = st.radio(
-    "Select peer country for comparison with Ireland:",
-    peer_options,
-    index=0,
-    horizontal=True
-)
 
-# create a display role column to control how each country is coloured on the map
-peer_df["display_role"] = "Other peer"
+# Create two main dashboard columns:
+# - the left column holds the radio buttons, map, and legend(?)
+# - the right column holds a compact summary of the selected peer
+map_col, summary_col = st.columns([2.3, 1])
 
-# mark Ireland as the fixed baseline country
-peer_df.loc[peer_df["country"] == "Ireland", "display_role"] = "Ireland"
+with map_col:
 
-# mark the peer country selected in the sidebar
-peer_df.loc[peer_df["country"] == selected_peer, "display_role"] = "Selected peer"
+    st.markdown("**Select peer country for comparison with Ireland:**")
 
+    # add horizontal radio buttons above the map
+    selected_peer = st.radio(
+        label="Peer country",
+        options=peer_options,
+        index=0,
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    
+    # create a display role column to control how each country is coloured on the map
+    peer_df["display_role"] = "Other peer"
 
-# create a filled country map
-fig = px.choropleth(
-    peer_df,
-    locations="iso_alpha",
-    locationmode="ISO-3",
-    color="display_role",
-    hover_name="country",
-    color_discrete_map={
-        "Ireland": "green",          # green
-        "Selected peer": "darkorange",    # stronger orange
-        "Other peer": "bisque"        # light orange
-    },
-    # title="Ireland and Selected Agricultural Peer Country"
-)
-# Improve the map appearance with natural Earth look
-fig.update_geos(
-    projection_type="natural earth",
-    showcountries=True,
-    countrycolor="white",     # white country borders
-    showcoastlines=True,
-    coastlinecolor="white",
-    showland=True,
-    landcolor="whitesmoke",      # very light grey for non-peer countries
-    showframe=False,
+    # mark Ireland as the fixed baseline country
+    peer_df.loc[peer_df["country"] == "Ireland", "display_role"] = "Ireland"
 
-    # These ranges focus the map on Europe, Australia, and New Zealand.
-    # This avoids most of the Americas after Uruguay is removed.
-    lonaxis_range=[-70, 180],
-    lataxis_range=[-60, 65]
-)
+    # mark the peer country selected in the sidebar
+    peer_df.loc[peer_df["country"] == selected_peer, "display_role"] = "Selected peer"
 
-# add subtle borders around the filled peer countries
-fig.update_traces(
-    marker_line_color="white",
-    marker_line_width=0.8
-)
+    # create a filled country map
+    fig = px.choropleth(
+        peer_df,
+        locations="iso_alpha",
+        locationmode="ISO-3",
+        color="display_role",
+        hover_name="country",
+        color_discrete_map={
+            "Ireland": "green",          # green
+            "Selected peer": "darkorange",    # stronger orange
+            "Other peer": "bisque"        # light orange
+        },
+        # title="Ireland and Selected Agricultural Peer Country"
+    )
+    # Improve the map appearance with natural Earth look
+    fig.update_geos(
+        projection_type="natural earth",
+        showcountries=True,
+        countrycolor="white",     # white country borders
+        showcoastlines=True,
+        coastlinecolor="white",
+        showland=True,
+        landcolor="whitesmoke",      # very light grey for non-peer countries
+        showframe=False,
+        # these ranges focus the map on Europe, Australia, Uruguay and New Zealand
+        lonaxis_range=[-70, 180],
+        lataxis_range=[-60, 65]
+    )
 
-# set a fixed figure size so the map is larger but not stretched across the full screen
-fig.update_layout(
-    width=950,
-    height=600,
-    margin=dict(l=0, r=0, t=50, b=0),
-    showlegend=False
-)
+    # add subtle borders around the filled peer countries
+    fig.update_traces(
+        marker_line_color="white",
+        marker_line_width=0.8
+    )
 
-# display the map in Streamlit.
-st.plotly_chart(fig, width="content")
+    # set a fixed figure size so the map is larger but not stretched across the full screen
+    fig.update_layout(
+        width=950,
+        height=600,
+        margin=dict(l=0, r=0, t=50, b=0),
+        showlegend=False
+    )
+
+    # display the map in Streamlit.
+    st.plotly_chart(fig, width="stretch")
 
 
 
