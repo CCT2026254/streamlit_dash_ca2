@@ -62,7 +62,7 @@ fig = px.choropleth(
         "Selected peer": "#F28E2B",    # stronger orange
         "Other peer": "#FAD7A0"        # light orange
     },
-    title="Ireland and Selected Agricultural Peer Country"
+    # title="Ireland and Selected Agricultural Peer Country"
 )
 # Improve the map appearance with natural Earth look
 fig.update_geos(
