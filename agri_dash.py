@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
+
 
 # set the browser tab title and use a wide layout so the dashboard fits on one screen
 st.set_page_config(
@@ -74,6 +76,22 @@ with map_col:
         },
         # title="Ireland and Selected Agricultural Peer Country"
     )
+
+    # display the name of selected country
+    selected_iso = peer_df.loc[peer_df["country"] == selected_peer, "iso_alpha"].iloc[0]
+    # this is a text layer placed over the filled country map
+    fig.add_trace(
+        go.Scattergeo(
+            locations=[selected_iso],
+            locationmode="ISO-3",
+            text=[selected_peer],
+            mode="text",
+            textfont=dict(size=15, color="black"),
+            showlegend=False,
+            hoverinfo="skip"
+        )
+    )
+
     # Improve the map appearance with natural Earth look
     fig.update_geos(
         projection_type="natural earth",
@@ -97,8 +115,8 @@ with map_col:
 
     # set a fixed figure size so the map is larger but not stretched across the full screen
     fig.update_layout(
-        height=560,
-        margin=dict(l=0, r=0, t=50, b=0),
+        height=430,
+        margin=dict(l=0, r=0, t=0, b=0),
         showlegend=False
     )
 
