@@ -58,9 +58,9 @@ fig = px.choropleth(
     color="display_role",
     hover_name="country",
     color_discrete_map={
-        "Ireland": "#2E8B57",          # green
-        "Selected peer": "#F28E2B",    # stronger orange
-        "Other peer": "#FAD7A0"        # light orange
+        "Ireland": "green",          # green
+        "Selected peer": "darkorange",    # stronger orange
+        "Other peer": "bisque"        # light orange
     },
     # title="Ireland and Selected Agricultural Peer Country"
 )
@@ -72,7 +72,7 @@ fig.update_geos(
     showcoastlines=True,
     coastlinecolor="white",
     showland=True,
-    landcolor="#F2F2F2",      # very light grey for non-peer countries
+    landcolor="whitesmoke",      # very light grey for non-peer countries
     showframe=False,
 
     # These ranges focus the map on Europe, Australia, and New Zealand.
@@ -81,8 +81,14 @@ fig.update_geos(
     lataxis_range=[-50, 65]
 )
 
+# add subtle borders around the filled peer countries
+fig.update_traces(
+    marker_line_color="white",
+    marker_line_width=0.8
+)
+
 # display the map in Streamlit.
-st.plotly_chart(fig, width="stretch")
+st.plotly_chart(fig, width="content")
 
 
 
