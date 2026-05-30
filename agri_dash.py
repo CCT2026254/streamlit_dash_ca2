@@ -23,7 +23,7 @@ peer_countries = [
     {"country": "United Kingdom", "iso_alpha": "GBR", "role": "Peer country"},
     {"country": "Australia", "iso_alpha": "AUS", "role": "Peer country"},
     {"country": "New Zealand", "iso_alpha": "NZL", "role": "Peer country"},
-    # {"country": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
+    {"country": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
 ]
 
 # convert the list of dictionaries into a pandas dataframe
@@ -77,8 +77,8 @@ fig.update_geos(
 
     # These ranges focus the map on Europe, Australia, and New Zealand.
     # This avoids most of the Americas after Uruguay is removed.
-    lonaxis_range=[-15, 180],
-    lataxis_range=[-50, 65]
+    lonaxis_range=[-70, 180],
+    lataxis_range=[-60, 65]
 )
 
 # add subtle borders around the filled peer countries
