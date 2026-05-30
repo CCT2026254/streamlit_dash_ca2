@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.express as px
 
 # set the browser tab title and use a wide layout so the dashboard fits on one screen
 st.set_page_config(
@@ -15,6 +16,66 @@ st.caption(
     "Interactive dashboard showing countries identified as agricultural peers of Ireland "
     "through Machine Learning clustering, with production and export comparisons"
 )
+
+# create a list of countries to display on the map
+peer_countries = [
+    {"country": "Ireland", "iso_alpha": "IRL", "role": "Ireland"},
+    {"country": "United Kingdom", "iso_alpha": "GBR", "role": "Peer country"},
+    {"country": "Australia", "iso_alpha": "AUS", "role": "Peer country"},
+    {"country": "New Zealand", "iso_alpha": "NZL", "role": "Peer country"},
+    {"country": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
+]
+
+# convert the list of dictionaries into a pandas dataframe
+peer_df = pd.DataFrame(peer_countries)
+
+# create a list of selectable peer countries (i.e. exclude Ireland)
+peer_options = peer_df.loc[peer_df["country"] != "Ireland", "country"].tolist()
+
+# create a sidebar selection box with the list of peer countries
+selected_peer = st.sidebar.selectbox(
+    "Select peer country",
+    peer_options,
+    index=0
+)
+
+# create a display role column to control how each country is coloured on the map
+peer_df["display_role"] = "Other peer"
+
+# mark Ireland as the fixed baseline country
+peer_df.loc[peer_df["country"] == "Ireland", "display_role"] = "Ireland"
+
+# mark the peer country selected in the sidebar
+peer_df.loc[peer_df["country"] == selected_peer, "display_role"] = "Selected peer"
+
+
+# create a filled country map
+fig = px.choropleth(
+    peer_df,
+    locations="iso_alpha",
+    locationmode="ISO-3",
+    color="display_role",
+    hover_name="country",
+    color_discrete_map={
+        "Ireland": "green",
+        "Selected peer": "orange",
+        "Other peer": "lightgrey"
+    },
+    title="Ireland and Selected Agricultural Peer Country"
+)
+# Improve the map appearance with natural Earth look
+fig.update_geos(
+    projection_type="natural earth",
+    showcountries=True,
+    showcoastlines=True,
+    showland=True
+)
+
+# display the map in Streamlit.
+st.plotly_chart(fig, width="stretch")
+
+
+
 
 # def load_data(nrows):
 #     data = pd.read_csv(DATA_URL, nrows=nrows)
