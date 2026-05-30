@@ -21,11 +21,11 @@ st.caption(
 
 # create a list of countries to display on the map
 peer_countries = [
-    {"country": "Ireland", "iso_alpha": "IRL", "role": "Ireland"},
-    {"country": "United Kingdom", "iso_alpha": "GBR", "role": "Peer country"},
-    {"country": "Australia", "iso_alpha": "AUS", "role": "Peer country"},
-    {"country": "New Zealand", "iso_alpha": "NZL", "role": "Peer country"},
-    {"country": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
+    {"country": "Ireland", "map_label": "Ireland", "iso_alpha": "IRL", "role": "Ireland"},
+    {"country": "United Kingdom", "map_label": "UK", "iso_alpha": "GBR", "role": "Peer country"},
+    {"country": "Australia", "map_label": "Australia", "iso_alpha": "AUS", "role": "Peer country"},
+    {"country": "New Zealand", "map_label": "New Zealand", "iso_alpha": "NZL", "role": "Peer country"},
+    {"country": "Uruguay", "map_label": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
 ]
 
 # convert the list of dictionaries into a pandas dataframe
@@ -79,12 +79,13 @@ with map_col:
 
     # display the name of selected country
     selected_iso = peer_df.loc[peer_df["country"] == selected_peer, "iso_alpha"].iloc[0]
+    selected_map_label = peer_df.loc[peer_df["country"] == selected_peer, "map_label"].iloc[0]
     # this is a text layer placed over the filled country map
     fig.add_trace(
         go.Scattergeo(
             locations=[selected_iso],
             locationmode="ISO-3",
-            text=[selected_peer],
+            text=[selected_map_label],
             mode="text",
             textfont=dict(size=15, color="black"),
             showlegend=False,
