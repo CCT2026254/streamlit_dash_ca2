@@ -134,7 +134,7 @@ land_df = load_land_data()
 
 # format land values for display.
 def format_land_value(value):
-    return f"{value:,.0f} ('000 ha)"    # the data unit is 1,000 hectares
+    return f"{value*1000:,.0f} ha"    # the data unit is 1,000 hectares
 
 # get the land-use row for a selected country and year
 def get_land_row(country_name, year=2023):
@@ -153,7 +153,7 @@ def create_land_pie_chart(row, display_name):
         "value": [row["arable_land_ha"], permanent_crops, row["permanent_meadows_and_pastures_ha"]]})
 
     # create the pie chart
-    fig = px.pie(pie_df, names="land_type", values="value", hole=0.35, title=display_name)
+    fig = px.pie(pie_df, names="land_type", values="value", hole=0.35) #, title=display_name)
     # keep the pie chart compact for the right-side summary panel
     fig.update_layout(height=230, margin=dict(l=35, r=0, t=0, b=0), showlegend=True, legend_title_text="")
 
@@ -189,8 +189,6 @@ with summary_col:
     # show Ireland first as the fixed baseline
     ireland_row = peer_df.loc[peer_df["country"] == "Ireland"].iloc[0]
     show_land_summary(display_name="Ireland", land_country_name=ireland_row["country"])
-
-    st.divider()
 
     # show the selected peer country
     show_land_summary(display_name=selected_peer_row["country"], land_country_name=selected_peer_row["country"])
