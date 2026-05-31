@@ -115,7 +115,7 @@ with map_col:
     # set a fixed figure size so the map is larger but not stretched across the full screen
     fig.update_layout(
         height=420,
-        margin=dict(l=-5, r=0, t=0, b=0),
+        margin=dict(l=0, r=5, t=0, b=0),
         showlegend=False
     )
 
