@@ -191,4 +191,4 @@ with summary_col:
     show_land_summary(display_name="Ireland", land_country_name=ireland_row["country"])
 
     # show the selected peer country
-    show_land_summary(display_name=selected_peer_row["map_label"], land_country_name=selected_peer_row["country"])
+    show_land_summary(display_name=selected_peer_row["country"], land_country_name=selected_peer_row["country"])
