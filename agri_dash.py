@@ -164,7 +164,7 @@ def create_land_pie_chart(row):
     # create the pie chart
     fig = px.pie(pie_df, names="land_type", values="value", color="land_type", color_discrete_map=land_type_colours, hole=0.35)
     # keep the pie chart compact for the right-side summary panel
-    fig.update_layout(height=170, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
+    fig.update_layout(height=180, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
 
     # make the hover labels easier to read
     fig.update_traces(textinfo="percent", hovertemplate="%{label}<br>%{value:,.0f} ha<br>%{percent}<extra></extra>")
