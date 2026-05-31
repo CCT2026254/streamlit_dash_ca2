@@ -140,7 +140,8 @@ land_type_colours = {
 
 # format land values for display.
 def format_land_value(value):
-    return f"{value*1000:,.0f} ha"    # the data unit is 1,000 hectares
+    value_ha = value * 1000
+    return f"{value_ha:,.0f} ha"    # the data unit is 1,000 hectares
 
 # get the land-use row for a selected country and year
 def get_land_row(country_name, year=2023):
@@ -151,17 +152,17 @@ def get_land_row(country_name, year=2023):
 # create a small land-use pie chart for one country
 def create_land_pie_chart(row):
     # calculate Permanent crops = Cropland - Arable land
-    permanent_crops = row["cropland_ha"] - row["arable_land_ha"]
+    permanent_crops = (row["cropland_ha"] - row["arable_land_ha"]) * 1000
 
     # create a small dataframe for the pie chart
     pie_df = pd.DataFrame({
         "land_type": ["Arable land", "Perm. crops", "Perm. meadows and pastures"],
-        "value": [row["arable_land_ha"], permanent_crops, row["permanent_meadows_and_pastures_ha"]]})
+        "value": [row["arable_land_ha"]*1000, permanent_crops, row["permanent_meadows_and_pastures_ha"]*1000]})
 
     # create the pie chart
     fig = px.pie(pie_df, names="land_type", values="value", color="land_type", color_discrete_map=land_type_colours, hole=0.35)
     # keep the pie chart compact for the right-side summary panel
-    fig.update_layout(height=165, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
+    fig.update_layout(height=170, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
 
     # make the hover labels easier to read
     fig.update_traces(textinfo="percent",
