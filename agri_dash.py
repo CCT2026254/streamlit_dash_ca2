@@ -6,10 +6,7 @@ import plotly.graph_objects as go
 
 
 # set the browser tab title and use a wide layout so the dashboard fits on one screen
-st.set_page_config(
-    page_title="Ireland Agricultural Peer Dashboard",
-    layout="wide"
-)
+st.set_page_config(page_title="Ireland Agricultural Peer Dashboard", layout="wide")
 
 # add the main dashboard title
 st.title("Ireland Agricultural Peer Dashboard 🇮🇪🌾")
@@ -35,13 +32,13 @@ peer_df = pd.DataFrame(peer_countries)
 peer_options = peer_df.loc[peer_df["country"] != "Ireland", "country"].tolist()
 
 
-# Create two main dashboard columns:
+## Create two main dashboard columns:
 # - the left column holds the radio buttons, map, and legend(?)
 # - the right column holds a compact summary of the selected peer
 map_col, summary_col = st.columns([2.3, 1])
 
+## Map column: radio buttons to select peer country + worldmap
 with map_col:
-
     st.markdown("**Select peer country for comparison with Ireland:**")
 
     # add horizontal radio buttons above the map
@@ -125,24 +122,76 @@ with map_col:
     st.plotly_chart(fig, width="stretch")
 
 
+### Show Irelan's and selected country's Agricultural land stats (from the latest year available) in summary panel on the right
+# cache the land dataset so Streamlit does not reload it after every interaction
+@st.cache_data
+def load_land_data():
+    land_df = pd.read_csv("land_df.csv")
+    return land_df
+
+# load land-use data
+land_df = load_land_data()
+
+# format land values for display.
+def format_land_value(value):
+    return f"{value:,.0f} ('000 ha)"    # the data unit is 1,000 hectares
+
+# get the land-use row for a selected country and year
+def get_land_row(country_name, year=2023):
+    # filter the land dataframe to the selected country and year
+    country_year_df = land_df[(land_df["country_name"] == country_name) & (land_df["year"] == year)]
+    return country_year_df.iloc[0]
+
+# create a small land-use pie chart for one country
+def create_land_pie_chart(row, display_name):
+    # calculate Permanent crops = Cropland - Arable land
+    permanent_crops = row["cropland_ha"] - row["arable_land_ha"]
+
+    # create a small dataframe for the pie chart
+    pie_df = pd.DataFrame({
+        "land_type": ["Arable land", "Permanent crops", "Permanent meadows and pastures"],
+        "value": [row["arable_land_ha"], permanent_crops, row["permanent_meadows_and_pastures_ha"]]})
+
+    # create the pie chart
+    fig = px.pie(pie_df, names="land_type", values="value", hole=0.35, title=display_name)
+    # keep the pie chart compact for the right-side summary panel
+    fig.update_layout(height=230, margin=dict(l=0, r=0, t=35, b=0), showlegend=True, legend_title_text="")
+
+    # make the hover labels easier to read
+    fig.update_traces(textinfo="percent",
+        hovertemplate="%{label}<br>%{value:,.0f} ha<br>%{percent}<extra></extra>"
+    )
+    return fig
+
+# show the land summary for one country
+def show_land_summary(display_name, land_country_name):
+
+    row = get_land_row(land_country_name, year=2023)
+
+    # show country name and agricultural land as the card title
+    st.markdown(f"**{display_name}: {format_land_value(row['agricultural_land_ha'])}**")
+
+    # create and display the pie chart
+    fig = create_land_pie_chart(row, display_name)
+
+    st.plotly_chart(fig, width="stretch") #, config={"displayModeBar": False})
 
 
-# def load_data(nrows):
-#     data = pd.read_csv(DATA_URL, nrows=nrows)
-#     lower_case = lambda x: str(x).lower()
-#     data.rename(lower_case, axis="columns", inplace=True)
-#     data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
-#     return data
+## Summary of Irelan's and selected country's agri land
+#  - total area ha (from the latest year available =2023)
+#  - small pie chart with agri land structure
+with summary_col:
+    st.subheader("Agricultural land")
+    st.caption("Latest available year: 2023")
 
-# data_load_state = st.text("Loading Data ...")
-# data = load_data(10000)
-# data_load_state.text("Loading Data ... Done! ✅")
+    # get the selected peer row from peer_df
+    selected_peer_row = peer_df.loc[peer_df["country"] == selected_peer].iloc[0]
 
-# st.subheader("Raw Data")
-# st.write(data)
+    # show Ireland first as the fixed baseline
+    ireland_row = peer_df.loc[peer_df["country"] == "Ireland"].iloc[0]
+    show_land_summary(display_name="Ireland", land_country_name=ireland_row["land_country_name"])
 
-# # add histogram
-# st.subheader("Number of Pickups per hour")
-# hist_values = np.histogram(data[DATE_COLUMN].dt.hour, bins=24, range=(0,24))[0]
-# st.bar_chart(hist_values)
+    st.divider()
 
+    # show the selected peer country
+    show_land_summary(display_name=selected_peer_row["map_label"], land_country_name=selected_peer_row["land_country_name"])
