@@ -69,7 +69,7 @@ with map_col:
         color_discrete_map={
             "Ireland": "green",          # green
             "Selected peer": "darkorange",    # stronger orange
-            "Other peer": "bisque"        # light orange
+            "Other peer": "oldlace"        # light orange
         },
         # title="Ireland and Selected Agricultural Peer Country"
     )
@@ -132,6 +132,12 @@ def load_land_data():
 # load land-use data
 land_df = load_land_data()
 
+# define fixed colours for land-use categories
+land_type_colours = {
+    "Arable land": "#41bbc5",                      
+    "Permanent crops": "#c0cf66",                  
+    "Permanent meadows and pastures": "#2dd460"}
+
 # format land values for display.
 def format_land_value(value):
     return f"{value*1000:,.0f} ha"    # the data unit is 1,000 hectares
@@ -143,19 +149,19 @@ def get_land_row(country_name, year=2023):
     return country_year_df.iloc[0]
 
 # create a small land-use pie chart for one country
-def create_land_pie_chart(row, display_name):
+def create_land_pie_chart(row):
     # calculate Permanent crops = Cropland - Arable land
     permanent_crops = row["cropland_ha"] - row["arable_land_ha"]
 
     # create a small dataframe for the pie chart
     pie_df = pd.DataFrame({
-        "land_type": ["Arable land", "Permanent crops", "Permanent meadows and pastures"],
+        "land_type": ["Arable land", "Perm. crops", "Perm. meadows and pastures"],
         "value": [row["arable_land_ha"], permanent_crops, row["permanent_meadows_and_pastures_ha"]]})
 
     # create the pie chart
-    fig = px.pie(pie_df, names="land_type", values="value", hole=0.35) #, title=display_name)
+    fig = px.pie(pie_df, names="land_type", values="value", color="land_type", color_discrete_map=land_type_colours, hole=0.35)
     # keep the pie chart compact for the right-side summary panel
-    fig.update_layout(height=230, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
+    fig.update_layout(height=165, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
 
     # make the hover labels easier to read
     fig.update_traces(textinfo="percent",
@@ -172,10 +178,9 @@ def show_land_summary(display_name, land_country_name):
     st.markdown(f"**{display_name}: {format_land_value(row['agricultural_land_ha'])}**")
 
     # create and display the pie chart
-    fig = create_land_pie_chart(row, display_name)
+    fig = create_land_pie_chart(row)
 
     st.plotly_chart(fig, width="stretch") #, config={"displayModeBar": False})
-
 
 ## Summary of Irelan's and selected country's agri land
 #  - total area ha (from the latest year available =2023)
