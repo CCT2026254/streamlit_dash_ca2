@@ -35,7 +35,7 @@ peer_options = peer_df.loc[peer_df["country"] != "Ireland", "country"].tolist()
 ## Create two main dashboard columns:
 # - the left column holds the radio buttons, map, and legend(?)
 # - the right column holds a compact summary of the selected peer
-map_col, summary_col = st.columns([2, 1])
+map_col, summary_col = st.columns([2, 1.1])
 
 ## Map column: radio buttons to select peer country + worldmap
 with map_col:
