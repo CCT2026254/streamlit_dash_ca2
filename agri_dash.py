@@ -128,9 +128,10 @@ with map_col:
 def load_data():
     land_df = pd.read_csv("land_df.csv")
     prod_df = pd.read_csv("prod_df.csv")
-    return land_df, prod_df
+    export_df = pd.read_csv("export_df.csv")
+    return land_df, prod_df, export_df
 # load data
-land_df, prod_df = load_data()
+land_df, prod_df, export_df = load_data()
 
 # define fixed colours for land-use categories
 land_type_colours = {
@@ -303,5 +304,86 @@ with production_tab:
         st.plotly_chart(meat_fig, width="stretch",config={"displayModeBar": False})
 
 
+
+### Export data display (similar to production data display)
+# Define export groups for the dashboard
+export_groups = {
+    "Crops 🌾🥔": {"Barley": "barley_export_value_ths_usd", "Oats": "oats_export_value_ths_usd",  "Rolled oats": "oats_rolled_export_value_ths_usd", "Potatoes": "potatoes_export_value_ths_usd", "Vegetable products": "vegetable_products_export_value_ths_usd", "Fresh/frozen vegetables": ["other_vegetables_fresh_export_value_ths_usd", "vegetables_frozen_export_value_ths_usd"], "Wheat": "wheat_export_value_ths_usd"},
+    "Dairy products 🧀🍶": { "Butter": "butter_of_cow_milk_export_value_ths_usd", "Cheese": ["cheese_from_milk_of_sheep_export_value_ths_usd", "cheese_from_whole_cow_milk_export_value_ths_usd"], "Cream": "cream_fresh_export_value_ths_usd", "Raw milk": "raw_milk_of_cattle_export_value_ths_usd", "Milk powders/condensed": ["skim_milk_and_whey_powder_export_value_ths_usd", "skim_milk_condensed_export_value_ths_usd", "whole_milk_condensed_export_value_ths_usd", "whole_milk_powder_export_value_ths_usd"], "Skim milk": "skim_milk_of_cows_export_value_ths_usd", "Other dairy": "dairy_products_export_value_ths_usd"},
+    "Meat & eggs 🥩🥚": {"Hen eggs": "hen_eggs_in_shell_fresh_export_value_ths_usd", "Liquid eggs": "eggs_liquid_export_value_ths_usd", "Cattle meat": ["meat_of_cattle_boneless_export_value_ths_usd", "meat_of_cattle_with_the_bone_export_value_ths_usd"], "Chicken meat": "meat_of_chickens_export_value_ths_usd", "Pig meat": ["meat_of_pig_boneless_export_value_ths_usd", "meat_of_pig_with_the_bone_export_value_ths_usd"], "Sheep meat": "meat_of_sheep_export_value_ths_usd", "Goat meat": "meat_of_goat_export_value_ths_usd"}}
+
+# format total export value from thousand usd to readable usd
+def format_export_value(value_ths_usd):
+    value_usd = value_ths_usd * 1000
+    return f"${value_usd / 1_000_000_000:.1f}bn" if value_usd >= 1_000_000_000 else f"${value_usd / 1_000_000:.1f}m"
+
+# get export value from one column or sum several columns
+def get_export_value(row, column_or_columns):
+    if isinstance(column_or_columns, list):
+        existing_columns = [col for col in column_or_columns if col in export_df.columns]
+        return row[existing_columns].sum(skipna=True, min_count=1) if existing_columns else None
+    return row[column_or_columns] if column_or_columns in export_df.columns else None
+
+# get one country-year row
+def get_export_row(country, year):
+    country_year_df = export_df[(export_df["country_name"] == country) & (export_df["year"] == year)]
+    return None if country_year_df.empty else country_year_df.iloc[0]
+
+# build chart data for one export group
+def build_export_chart_data(selected_peer, selected_year, group_name):
+    selected_peer_label = peer_df.loc[peer_df["country"] == selected_peer, "map_label"].iloc[0]
+    country_display_names = {"Ireland": "Ireland", selected_peer: selected_peer_label}
+    year_df = export_df[(export_df["year"] == selected_year) & (export_df["country_name"].isin(["Ireland", selected_peer]))]
+    chart_rows = []
+    for _, row in year_df.iterrows():
+        for product_label, column_or_columns in export_groups[group_name].items():
+            value_ths_usd = get_export_value(row, column_or_columns)
+            chart_rows.append({"country": country_display_names[row["country_name"]], "product": product_label, "export_value_m_usd": value_ths_usd / 1000 if pd.notna(value_ths_usd) else None})
+    return pd.DataFrame(chart_rows).dropna(subset=["export_value_m_usd"])
+
+# create one export bar chart
+def create_export_bar_chart(chart_df, group_name, selected_peer):
+    selected_peer_label = peer_df.loc[peer_df["country"] == selected_peer, "map_label"].iloc[0]
+    fig = px.bar(chart_df, y="product", x="export_value_m_usd", color="country", orientation="h", barmode="group", title=group_name, labels={"product": "", "export_value_m_usd": "Export value (million USD)", "country": "Country"}, color_discrete_map={"Ireland": "green", selected_peer_label: "darkorange"})
+    fig.update_layout(height=360, margin=dict(l=0, r=0, t=45, b=0), legend_title_text="", xaxis_tickformat=",", paper_bgcolor="rgba(0,0,0,0)", title_x=0.5, title_xanchor="center")
+    fig.update_traces(hovertemplate="%{y}<br>$%{x:,.1f} million<extra></extra>")
+    return fig
+
 with export_tab:
-    st.info("Export comparison will be added next.")
+    st.markdown("Export comparison between Ireland and the selected peer country. Values are shown in million USD.")
+
+    # keep export years aligned with the recent analysis period
+    available_export_years = sorted(export_df.loc[export_df["year"].between(2015, 2024), "year"].dropna().unique())
+    selected_export_year = st.slider("Select export year", min_value=int(min(available_export_years)), max_value=int(max(available_export_years)), value=int(max(available_export_years)), step=1, key="export_year")
+
+    # show total agricultural export value for ireland and selected peer
+    selected_peer_label = peer_df.loc[peer_df["country"] == selected_peer, "map_label"].iloc[0]
+    ireland_export_row = get_export_row("Ireland", selected_export_year)
+    peer_export_row = get_export_row(selected_peer, selected_export_year)
+    total_col_1, total_col_2 = st.columns(2)
+
+    with total_col_1:
+        if ireland_export_row is not None:
+            st.metric(label=f"Ireland total agri export value ({selected_export_year})", value=format_export_value(ireland_export_row["crops_and_livestock_products_export_value_ths_usd"]))
+
+    with total_col_2:
+        if peer_export_row is not None:
+            st.metric(label=f"{selected_peer_label} total agri export value ({selected_export_year})", value=format_export_value(peer_export_row["crops_and_livestock_products_export_value_ths_usd"]))
+
+    # show export structure by product group
+    export_crop_col, export_dairy_col, export_meat_col = st.columns(3)
+
+    with export_crop_col:
+        export_crop_df = build_export_chart_data(selected_peer, selected_export_year, "Crops 🌾🥔")
+        export_crop_fig = create_export_bar_chart(export_crop_df, "Crops 🌾🥔", selected_peer)
+        st.plotly_chart(export_crop_fig, width="stretch", config={"displayModeBar": False})
+
+    with export_dairy_col:
+        export_dairy_df = build_export_chart_data(selected_peer, selected_export_year, "Dairy products 🧀🍶")
+        export_dairy_fig = create_export_bar_chart(export_dairy_df, "Dairy products 🧀🍶", selected_peer)
+        st.plotly_chart(export_dairy_fig, width="stretch", config={"displayModeBar": False})
+
+    with export_meat_col:
+        export_meat_df = build_export_chart_data(selected_peer, selected_export_year, "Meat & eggs 🥩🥚")
+        export_meat_fig = create_export_bar_chart(export_meat_df, "Meat & eggs 🥩🥚", selected_peer)
+        st.plotly_chart(export_meat_fig, width="stretch", config={"displayModeBar": False})
