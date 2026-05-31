@@ -137,7 +137,7 @@ land_df, prod_df, export_df = load_data()
 land_type_colours = {
     "Arable land": "#41bbc5",                      
     "Permanent crops": "#c0cf66",                  
-    "Permanent meadows and pastures": "#2dd460"}
+    "Perm. meadows and pastures": "#2dd460"}
 
 # format land values for display.
 def format_land_value(value):
