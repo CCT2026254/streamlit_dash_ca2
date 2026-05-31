@@ -102,7 +102,7 @@ with map_col:
         showframe=False,
         # these ranges focus the map on Europe, Australia, Uruguay and New Zealand
         lonaxis_range=[-70, 180],
-        lataxis_range=[-60, 65]
+        lataxis_range=[-70, 65]
     )
 
     # add subtle borders around the filled peer countries
@@ -135,9 +135,9 @@ land_df, prod_df, export_df = load_data()
 
 # define fixed colours for land-use categories
 land_type_colours = {
-    "Arable land": "#41bbc5",                      
-    "Permanent crops": "#c0cf66",                  
-    "Perm. meadows and pastures": "#2dd460"}
+    "Arable land": "#11a0aa",                      
+    "Permanent crops": "#c9ca8e",                  
+    "Perm. meadows and pastures": "#86cc31"}
 
 # format land values for display.
 def format_land_value(value):
