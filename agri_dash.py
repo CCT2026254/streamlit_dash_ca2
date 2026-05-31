@@ -194,4 +194,4 @@ with summary_col:
     st.divider()
 
     # show the selected peer country
-    show_land_summary(display_name=selected_peer_row["map_label"], land_country_name=selected_peer_row["land_country_name"])
+    show_land_summary(display_name=selected_peer_row["map_label"], land_country_name=selected_peer_row["country"])
