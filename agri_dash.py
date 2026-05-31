@@ -35,7 +35,7 @@ peer_options = peer_df.loc[peer_df["country"] != "Ireland", "country"].tolist()
 ## Create two main dashboard columns:
 # - the left column holds the radio buttons, map, and legend(?)
 # - the right column holds a compact summary of the selected peer
-map_col, summary_col = st.columns([2.2, 1])
+map_col, summary_col = st.columns([2.1, 1])
 
 ## Map column: radio buttons to select peer country + worldmap
 with map_col:
@@ -114,7 +114,7 @@ with map_col:
 
     # set a fixed figure size so the map is larger but not stretched across the full screen
     fig.update_layout(
-        height=430,
+        height=420,
         margin=dict(l=0, r=0, t=0, b=0),
         showlegend=False
     )
@@ -187,7 +187,7 @@ def show_land_summary(display_name, land_country_name):
 #  - total area ha (from the latest year available =2023)
 #  - small pie chart with agri land structure
 with summary_col:
-    st.subheader("Agricultural land (2023)")
+    st.subheader("Agricultural lands (2023)")
 
     # get the selected peer row from peer_df
     selected_peer_row = peer_df.loc[peer_df["country"] == selected_peer].iloc[0]
