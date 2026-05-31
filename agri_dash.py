@@ -101,7 +101,7 @@ with map_col:
         landcolor="whitesmoke",      # very light grey for non-peer countries
         showframe=False,
         # these ranges focus the map on Europe, Australia, Uruguay and New Zealand
-        lonaxis_range=[-70, 180],
+        lonaxis_range=[-80, 180],
         lataxis_range=[-70, 65]
     )
 
