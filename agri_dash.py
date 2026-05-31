@@ -123,14 +123,14 @@ with map_col:
 
 
 ### Show Irelan's and selected country's Agricultural land stats (from the latest year available) in summary panel on the right
-# cache the land dataset so Streamlit does not reload it after every interaction
+# cache the datasets so Streamlit does not reload them after every interaction
 @st.cache_data
-def load_land_data():
+def load_data():
     land_df = pd.read_csv("land_df.csv")
-    return land_df
-
-# load land-use data
-land_df = load_land_data()
+    prod_df = pd.read_csv("prod_df.csv")
+    return land_df, prod_df
+# load data
+land_df, prod_df = load_data()
 
 # define fixed colours for land-use categories
 land_type_colours = {
@@ -156,7 +156,7 @@ def create_land_pie_chart(row):
 
     # create a small dataframe for the pie chart
     pie_df = pd.DataFrame({
-        "land_type": ["Arable land", "Perm. crops", "Perm. meadows and pastures"],
+        "land_type": ["Arable land", "Permanent crops", "Perm. meadows and pastures"],
         "value": [row["arable_land_ha"]*1000, permanent_crops, row["permanent_meadows_and_pastures_ha"]*1000]})
 
     # create the pie chart
@@ -165,9 +165,7 @@ def create_land_pie_chart(row):
     fig.update_layout(height=170, margin=dict(l=50, r=0, t=0, b=0), showlegend=True, legend_title_text="")
 
     # make the hover labels easier to read
-    fig.update_traces(textinfo="percent",
-        hovertemplate="%{label}<br>%{value:,.0f} ha<br>%{percent}<extra></extra>"
-    )
+    fig.update_traces(textinfo="percent", hovertemplate="%{label}<br>%{value:,.0f} ha<br>%{percent}<extra></extra>")
     return fig
 
 # show the land summary for one country
@@ -198,3 +196,110 @@ with summary_col:
 
     # show the selected peer country
     show_land_summary(display_name=selected_peer_row["country"], land_country_name=selected_peer_row["country"])
+
+
+### Production data display
+# Define production groups for the dashboard
+production_groups = {
+    "Crops": {"Barley": "barley_prod_t", "Cereals n.e.c.": "cereals_n_e_c_prod_t", "Oats": "oats_prod_t", "Potatoes": "potatoes_prod_t", "Pulses": "pulses_total_prod_t", "Vegetables": "vegetables_primary_prod_t", "Wheat": "wheat_prod_t"},
+    "Dairy products": {"Butter": "butter_of_cow_milk_prod_t", "Cheese": ["cheese_from_milk_of_goats_prod_t", "cheese_from_milk_of_sheep_prod_t", "cheese_from_skimmed_cow_milk_prod_t", "cheese_from_whole_cow_milk_prod_t"], "Cream": "cream_fresh_prod_t", "Milk": ["skim_milk_condensed_prod_t", "whole_milk_condensed_prod_t", "whole_milk_powder_prod_t", "skim_milk_and_whey_powder_prod_t"]},
+    "Meat & eggs": {"Hen eggs": "hen_eggs_in_shell_fresh_prod_t", "Cattle meat": "meat_of_cattle_prod_t", "Chicken meat": "meat_of_chickens_prod_t", "Goat meat": "meat_of_goat_prod_t", "Pig meat": "meat_of_pig_prod_t", "Sheep meat": "meat_of_sheep_prod_t"}}
+
+# Format large production values for chart text and hover labels
+def format_tonnes(value):
+    # return a compact tonnes label
+    return f"{value:,.0f} t"
+
+# get the production value for one country row and one dashboard item
+def get_production_value(row, column_or_columns):
+    # if the item is based on a list of columns, aggregate them
+    if isinstance(column_or_columns, list):
+        return row[column_or_columns].sum(skipna=True, min_count=1)     # min_count=1 means the result is NaN if all source columns are missing
+
+    # otherwise, return the single column value
+    return row[column_or_columns]
+
+# build the long-format dataframe needed for one production chart
+def build_production_chart_data(selected_peer, selected_year, group_name):
+    # get Ireland's country name
+    ireland_name = peer_df.loc[peer_df["country"] == "Ireland", "country"].iloc[0]
+    # get selected peer's country name
+    selected_peer_name = peer_df.loc[peer_df["country"] == selected_peer, "country"].iloc[0]
+    # create a mapping from production dataset names to dashboard display names
+    country_display_names = {ireland_name: "Ireland", selected_peer_name: peer_df.loc[peer_df["country"] == selected_peer, "map_label"].iloc[0]}
+    # filter production data to Ireland, selected peer, and selected year
+    year_df = prod_df[(prod_df["year"] == selected_year) & (prod_df["country_name"].isin([ireland_name, selected_peer_name]))]
+    # prepare an empty list for chart rows
+    chart_rows = []
+
+    # Loop through each country row
+    for _, row in year_df.iterrows():
+        # get the country name used for display in the chart
+        display_country = country_display_names[row["country_name"]]
+
+        # loop through each product in the selected group and calculate the production value
+        for product_label, column_or_columns in production_groups[group_name].items():
+            value = get_production_value(row, column_or_columns)
+            # add the value to the chart data
+            chart_rows.append({"country": display_country, "product": product_label, "production_t": value})
+
+    # convert chart rows into a dataframe
+    chart_df = pd.DataFrame(chart_rows)
+    # remove rows where production is missing
+    chart_df = chart_df.dropna(subset=["production_t"])
+    # return the chart dataframe
+    return chart_df
+
+
+# create one production bar chart
+def create_production_bar_chart(chart_df, group_name, selected_year):
+    # create a horizontal grouped bar chart
+    fig = px.bar(chart_df, y="product", x="production_t", color="country", orientation="h", barmode="group", title=f"{group_name}", labels={"product": "", "production_t": "Production (tonnes)", "country": "Country"})
+    # keep the chart compact
+    fig.update_layout(height=360, margin=dict(l=0, r=0, t=35, b=0), legend_title_text="", xaxis_tickformat=",") #, paper_bgcolor="rgba(0,0,0,0)")
+    # show exact values on hover
+    fig.update_traces(hovertemplate="%{y}<br>%{x:,.0f} tonnes<extra></extra>")
+    # return the finished figure
+    return fig
+
+
+## Below map and countries' summary add two tabs to display Production and Export data
+production_tab, export_tab = st.tabs(["Production", "Export"])
+# we'll only show data for recent years (2015-2023), also known as used for clustering
+production_start_year = 2015
+production_end_year = 2023
+
+with production_tab:
+    st.markdown(
+        "Production comparison between Ireland and the selected peer country. "
+        "Use the year slider to compare the production structure for a specific year.")
+    # filter the available production years to the selected dashboard period
+    available_production_years = sorted(prod_df.loc[ prod_df["year"].between(production_start_year, production_end_year), "year"].dropna().unique())
+
+    # create a year slider using the available production years
+    selected_year = st.slider("Select production year", min_value=int(min(available_production_years)), max_value=int(max(available_production_years)), value=int(max(available_production_years)), step=1)
+
+    # create three columns for the three product groups
+    crop_col, dairy_col, meat_col = st.columns(3)
+
+    # build and display the crops chart
+    with crop_col:
+        crop_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Crops")
+        crop_fig = create_production_bar_chart(chart_df=crop_df, group_name="Crops", selected_year=selected_year)
+        st.plotly_chart(crop_fig, width="stretch", config={"displayModeBar": False})
+
+    # build and display the dairy chart
+    with dairy_col:
+        dairy_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Dairy products")
+        dairy_fig = create_production_bar_chart(chart_df=dairy_df, group_name="Dairy products", selected_year=selected_year)
+        st.plotly_chart(dairy_fig, width="stretch", config={"displayModeBar": False})
+
+    # build and display the meat and eggs chart
+    with meat_col:
+        meat_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Meat & eggs")
+        meat_fig = create_production_bar_chart(chart_df=meat_df, group_name="Meat & eggs", selected_year=selected_year)
+        st.plotly_chart(meat_fig, width="stretch",config={"displayModeBar": False})
+
+
+with export_tab:
+    st.info("Export comparison will be added next.")
