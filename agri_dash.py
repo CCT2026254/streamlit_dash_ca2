@@ -102,7 +102,7 @@ with map_col:
         showframe=False,
         # these ranges focus the map on Europe, Australia, Uruguay and New Zealand
         lonaxis_range=[-60, 180],
-        lataxis_range=[-70, 65]
+        lataxis_range=[-60, 65]
     )
 
     # add subtle borders around the filled peer countries
