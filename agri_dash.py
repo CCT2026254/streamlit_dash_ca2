@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Ireland Agricultural Peer Dashboard", layout="wide")
 
 # add the main dashboard title
-st.title("Ireland Agricultural Peer Dashboard 🇮🇪🌾")
+st.title("Ireland Agricultural Peer Dashboard 🇮🇪")
 # add a short explanation so the user immediately understands the purpose of the dashboard
 st.caption(
     "Interactive dashboard showing countries identified as agricultural peers of Ireland "
@@ -201,7 +201,7 @@ with summary_col:
 ### Production data display
 # Define production groups for the dashboard
 production_groups = {
-    "Crops": {"Barley": "barley_prod_t", "Cereals n.e.c.": "cereals_n_e_c_prod_t", "Oats": "oats_prod_t", "Potatoes": "potatoes_prod_t", "Pulses": "pulses_total_prod_t", "Vegetables": "vegetables_primary_prod_t", "Wheat": "wheat_prod_t"},
+    "Crops 🌾": {"Barley": "barley_prod_t", "Cereals n.e.c.": "cereals_n_e_c_prod_t", "Oats": "oats_prod_t", "Potatoes": "potatoes_prod_t", "Pulses": "pulses_total_prod_t", "Vegetables": "vegetables_primary_prod_t", "Wheat": "wheat_prod_t"},
     "Dairy products": {"Butter": "butter_of_cow_milk_prod_t", "Cheese": ["cheese_from_milk_of_goats_prod_t", "cheese_from_milk_of_sheep_prod_t", "cheese_from_skimmed_cow_milk_prod_t", "cheese_from_whole_cow_milk_prod_t"], "Cream": "cream_fresh_prod_t", "Milk": ["skim_milk_condensed_prod_t", "whole_milk_condensed_prod_t", "whole_milk_powder_prod_t", "skim_milk_and_whey_powder_prod_t"]},
     "Meat & eggs": {"Hen eggs": "hen_eggs_in_shell_fresh_prod_t", "Cattle meat": "meat_of_cattle_prod_t", "Chicken meat": "meat_of_chickens_prod_t", "Goat meat": "meat_of_goat_prod_t", "Pig meat": "meat_of_pig_prod_t", "Sheep meat": "meat_of_sheep_prod_t"}}
 
@@ -253,10 +253,12 @@ def build_production_chart_data(selected_peer, selected_year, group_name):
 
 # create one production bar chart
 def create_production_bar_chart(chart_df, group_name, selected_year):
+    # get the short display label for the selected peer
+    selected_peer_label = peer_df.loc[peer_df["country"] == selected_peer, "map_label"].iloc[0]
     # create a horizontal grouped bar chart
-    fig = px.bar(chart_df, y="product", x="production_t", color="country", orientation="h", barmode="group", title=f"{group_name}", labels={"product": "", "production_t": "Production (tonnes)", "country": "Country"})
+    fig = px.bar(chart_df, y="product", x="production_t", color="country", orientation="h", barmode="group", title=f"{group_name}", labels={"product": "", "production_t": "Production (tonnes)", "country": "Country"}, color_discrete_map={"Ireland": "green", selected_peer_label: "darkorange"})
     # keep the chart compact
-    fig.update_layout(height=360, margin=dict(l=0, r=0, t=35, b=0), legend_title_text="", xaxis_tickformat=",") #, paper_bgcolor="rgba(0,0,0,0)")
+    fig.update_layout(height=360, margin=dict(l=0, r=0, t=35, b=0), legend_title_text="", xaxis_tickformat=",", title_x=0.5, title_xanchor="center")
     # show exact values on hover
     fig.update_traces(hovertemplate="%{y}<br>%{x:,.0f} tonnes<extra></extra>")
     # return the finished figure
@@ -277,7 +279,7 @@ with production_tab:
     available_production_years = sorted(prod_df.loc[ prod_df["year"].between(production_start_year, production_end_year), "year"].dropna().unique())
 
     # create a year slider using the available production years
-    selected_year = st.slider("Select production year", min_value=int(min(available_production_years)), max_value=int(max(available_production_years)), value=int(max(available_production_years)), step=1)
+    selected_year = st.slider("Select production year:", min_value=int(min(available_production_years)), max_value=int(max(available_production_years)), value=int(max(available_production_years)), step=1)
 
     # create three columns for the three product groups
     crop_col, dairy_col, meat_col = st.columns(3)
