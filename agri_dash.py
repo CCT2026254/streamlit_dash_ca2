@@ -155,7 +155,7 @@ def create_land_pie_chart(row, display_name):
     # create the pie chart
     fig = px.pie(pie_df, names="land_type", values="value", hole=0.35, title=display_name)
     # keep the pie chart compact for the right-side summary panel
-    fig.update_layout(height=230, margin=dict(l=0, r=0, t=35, b=0), showlegend=True, legend_title_text="")
+    fig.update_layout(height=230, margin=dict(l=35, r=0, t=0, b=0), showlegend=True, legend_title_text="")
 
     # make the hover labels easier to read
     fig.update_traces(textinfo="percent",
@@ -181,8 +181,7 @@ def show_land_summary(display_name, land_country_name):
 #  - total area ha (from the latest year available =2023)
 #  - small pie chart with agri land structure
 with summary_col:
-    st.subheader("Agricultural land")
-    st.caption("Latest available year: 2023")
+    st.subheader("Agricultural land (2023)")
 
     # get the selected peer row from peer_df
     selected_peer_row = peer_df.loc[peer_df["country"] == selected_peer].iloc[0]
@@ -194,4 +193,4 @@ with summary_col:
     st.divider()
 
     # show the selected peer country
-    show_land_summary(display_name=selected_peer_row["map_label"], land_country_name=selected_peer_row["country"])
+    show_land_summary(display_name=selected_peer_row["country"], land_country_name=selected_peer_row["country"])
