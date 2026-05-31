@@ -39,7 +39,8 @@ map_col, summary_col = st.columns([2.2, 1])
 
 ## Map column: radio buttons to select peer country + worldmap
 with map_col:
-    st.markdown("**Select peer country for comparison with Ireland:**")
+    # st.markdown("**Select peer country for comparison with Ireland:**")
+    st.subheader("Select peer country for comparison with Ireland:")
 
     # add horizontal radio buttons above the map
     selected_peer = st.radio(
