@@ -189,7 +189,7 @@ with summary_col:
 
     # show Ireland first as the fixed baseline
     ireland_row = peer_df.loc[peer_df["country"] == "Ireland"].iloc[0]
-    show_land_summary(display_name="Ireland", land_country_name=ireland_row["land_country_name"])
+    show_land_summary(display_name="Ireland", land_country_name=ireland_row["country"])
 
     st.divider()
 
