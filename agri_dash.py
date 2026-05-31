@@ -286,8 +286,8 @@ with production_tab:
 
     # build and display the crops chart
     with crop_col:
-        crop_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Crops")
-        crop_fig = create_production_bar_chart(chart_df=crop_df, group_name="Crops", selected_year=selected_year)
+        crop_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Crops 🌾")
+        crop_fig = create_production_bar_chart(chart_df=crop_df, group_name="Crops 🌾", selected_year=selected_year)
         st.plotly_chart(crop_fig, width="stretch", config={"displayModeBar": False})
 
     # build and display the dairy chart
