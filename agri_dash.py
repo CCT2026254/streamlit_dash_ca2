@@ -201,9 +201,9 @@ with summary_col:
 ### Production data display
 # Define production groups for the dashboard
 production_groups = {
-    "Crops 🌾": {"Barley": "barley_prod_t", "Cereals n.e.c.": "cereals_n_e_c_prod_t", "Oats": "oats_prod_t", "Potatoes": "potatoes_prod_t", "Pulses": "pulses_total_prod_t", "Vegetables": "vegetables_primary_prod_t", "Wheat": "wheat_prod_t"},
-    "Dairy products": {"Butter": "butter_of_cow_milk_prod_t", "Cheese": ["cheese_from_milk_of_goats_prod_t", "cheese_from_milk_of_sheep_prod_t", "cheese_from_skimmed_cow_milk_prod_t", "cheese_from_whole_cow_milk_prod_t"], "Cream": "cream_fresh_prod_t", "Milk": ["skim_milk_condensed_prod_t", "whole_milk_condensed_prod_t", "whole_milk_powder_prod_t", "skim_milk_and_whey_powder_prod_t"]},
-    "Meat & eggs": {"Hen eggs": "hen_eggs_in_shell_fresh_prod_t", "Cattle meat": "meat_of_cattle_prod_t", "Chicken meat": "meat_of_chickens_prod_t", "Goat meat": "meat_of_goat_prod_t", "Pig meat": "meat_of_pig_prod_t", "Sheep meat": "meat_of_sheep_prod_t"}}
+    "Crops 🌾🥔": {"Barley": "barley_prod_t", "Cereals": "cereals_n_e_c_prod_t", "Oats": "oats_prod_t", "Potatoes": "potatoes_prod_t", "Pulses": "pulses_total_prod_t", "Vegetables": "vegetables_primary_prod_t", "Wheat": "wheat_prod_t"},
+    "Dairy products 🧀🍶": {"Butter": "butter_of_cow_milk_prod_t", "Cheese": ["cheese_from_milk_of_goats_prod_t", "cheese_from_milk_of_sheep_prod_t", "cheese_from_skimmed_cow_milk_prod_t", "cheese_from_whole_cow_milk_prod_t"], "Cream": "cream_fresh_prod_t", "Milk": ["skim_milk_condensed_prod_t", "whole_milk_condensed_prod_t", "whole_milk_powder_prod_t", "skim_milk_and_whey_powder_prod_t"]},
+    "Meat & eggs 🥩🥚": {"Hen eggs": "hen_eggs_in_shell_fresh_prod_t", "Cattle meat": "meat_of_cattle_prod_t", "Chicken meat": "meat_of_chickens_prod_t", "Goat meat": "meat_of_goat_prod_t", "Pig meat": "meat_of_pig_prod_t", "Sheep meat": "meat_of_sheep_prod_t"}}
 
 # Format large production values for chart text and hover labels
 def format_tonnes(value):
@@ -286,20 +286,20 @@ with production_tab:
 
     # build and display the crops chart
     with crop_col:
-        crop_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Crops 🌾")
-        crop_fig = create_production_bar_chart(chart_df=crop_df, group_name="Crops 🌾", selected_year=selected_year)
+        crop_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Crops 🌾🥔")
+        crop_fig = create_production_bar_chart(chart_df=crop_df, group_name="Crops 🌾🥔", selected_year=selected_year)
         st.plotly_chart(crop_fig, width="stretch", config={"displayModeBar": False})
 
     # build and display the dairy chart
     with dairy_col:
-        dairy_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Dairy products")
-        dairy_fig = create_production_bar_chart(chart_df=dairy_df, group_name="Dairy products", selected_year=selected_year)
+        dairy_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Dairy products 🧀🍶")
+        dairy_fig = create_production_bar_chart(chart_df=dairy_df, group_name="Dairy products 🧀🍶", selected_year=selected_year)
         st.plotly_chart(dairy_fig, width="stretch", config={"displayModeBar": False})
 
     # build and display the meat and eggs chart
     with meat_col:
-        meat_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Meat & eggs")
-        meat_fig = create_production_bar_chart(chart_df=meat_df, group_name="Meat & eggs", selected_year=selected_year)
+        meat_df = build_production_chart_data(selected_peer=selected_peer, selected_year=selected_year, group_name="Meat & eggs 🥩🥚")
+        meat_fig = create_production_bar_chart(chart_df=meat_df, group_name="Meat & eggs 🥩🥚", selected_year=selected_year)
         st.plotly_chart(meat_fig, width="stretch",config={"displayModeBar": False})
 
 
