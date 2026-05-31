@@ -19,7 +19,7 @@ st.caption(
 # create a list of countries to display on the map
 peer_countries = [
     {"country": "Ireland", "map_label": "Ireland", "iso_alpha": "IRL", "role": "Ireland"},
-    {"country": "United Kingdom", "map_label": "UK", "iso_alpha": "GBR", "role": "Peer country"},
+    {"country": "United Kingdom of Great Britain and Northern Ireland", "map_label": "UK", "iso_alpha": "GBR", "role": "Peer country"},
     {"country": "Australia", "map_label": "Australia", "iso_alpha": "AUS", "role": "Peer country"},
     {"country": "New Zealand", "map_label": "New Zealand", "iso_alpha": "NZL", "role": "Peer country"},
     {"country": "Uruguay", "map_label": "Uruguay", "iso_alpha": "URY", "role": "Peer country"},
@@ -191,4 +191,4 @@ with summary_col:
     show_land_summary(display_name="Ireland", land_country_name=ireland_row["country"])
 
     # show the selected peer country
-    show_land_summary(display_name=selected_peer_row["country"], land_country_name=selected_peer_row["country"])
+    show_land_summary(display_name=selected_peer_row["map_label"], land_country_name=selected_peer_row["country"])
